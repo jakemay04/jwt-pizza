@@ -2,7 +2,7 @@ import { PizzaService, Franchise, FranchiseList, Store, OrderHistory, User, Menu
 
 const pizzaServiceUrl = import.meta.env.VITE_PIZZA_SERVICE_URL;
 const pizzaFactoryUrl = import.meta.env.VITE_PIZZA_FACTORY_URL;
-
+//function calls for https
 class HttpPizzaService implements PizzaService {
   async callEndpoint(path: string, method: string = 'GET', body?: any): Promise<any> {
     return new Promise(async (resolve, reject) => {
