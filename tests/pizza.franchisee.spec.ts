@@ -68,8 +68,6 @@ async function basicInit(page: Page) {
     await route.fulfill({ json: { message: 'ok', payload: 'data' } });
   });
 
-  // Franchises: single-franchise for franchisee and list queries
-  // Handle GET /api/franchise?... (list with query params)
   await page.route('*/**/api/franchise?*', async (route) => {
     const method = route.request().method();
     if (method === 'GET') {
@@ -89,12 +87,11 @@ async function basicInit(page: Page) {
   await page.route('*/**/api/franchise/*', async (route) => {
     const method = route.request().method();
     if (method === 'GET') {
-      // GET /api/franchise/:id - returns array with current franchise state
       const franchises = [franchise];
       await route.fulfill({ json: franchises });
       return;
     }
-    if (method === 'DELETE') {
+    if (method === 'DELETE') { 
       await route.fulfill({ status: 200 });
       return;
     }
@@ -121,10 +118,7 @@ async function basicInit(page: Page) {
       // Remove store from franchise's stores list
       const urlParts = url.split('/');
       const storeId = urlParts[urlParts.length - 1];
-      console.log(`  ❌ Closing store ID: ${storeId}`);
-      console.log(`  📋 Stores before delete:`, franchise.stores.map(s => ({ id: s.id, name: s.name })));
       franchise.stores = (franchise.stores || []).filter(s => s.id !== storeId);
-      console.log(`  📋 Stores after delete:`, franchise.stores.map(s => ({ id: s.id, name: s.name })));
       await route.fulfill({ status: 200 });
       return;
     }
