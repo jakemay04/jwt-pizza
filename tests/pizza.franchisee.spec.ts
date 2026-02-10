@@ -33,6 +33,92 @@ async function basicInit(page: Page) {
     await route.fulfill({ json: loggedInUser });
   });
 
+  // Standard menu (may be used by other flows)
+  await page.route('*/**/api/order/menu', async (route) => {
+    expect(route.request().method()).toBe('GET');
+    const menuRes = [
+      { id: 1, title: 'Veggie', image: 'pizza1.png', price: 0.0038, description: 'A garden of delight' },
+    ];
+    await route.fulfill({ json: menuRes });
+  });
+
+  // Orders endpoints
+  await page.route('*/**/api/order', async (route) => {
+    const method = route.request().method();
+    if (method === 'GET') {
+      const orders = { id: 1, dinerId: '3', orders: [] };
+      await route.fulfill({ json: orders });
+      return;
+    }
+    if (method === 'POST') {
+      const orderReq = route.request().postDataJSON();
+      const orderRes = { order: { ...orderReq, id: 23 }, jwt: 'eyJpYXQ' };
+      await route.fulfill({ json: orderRes });
+      return;
+    }
+    await route.fulfill({ status: 200 });
+  });
+
+  // Verify order (factory)
+  await page.route('*/**/api/order/verify', async (route) => {
+    expect(route.request().method()).toBe('POST');
+    await route.fulfill({ json: { message: 'ok', payload: 'data' } });
+  });
+
+  // Franchises: single-franchise for franchisee and list queries
+  // Handle GET /api/franchise?... (list with query params)
+  await page.route('*/**/api/franchise?*', async (route) => {
+    const method = route.request().method();
+    if (method === 'GET') {
+      const franchiseRes = { franchises: [], more: false };
+      await route.fulfill({ json: franchiseRes });
+      return;
+    }
+    if (method === 'POST') {
+      const body = route.request().postDataJSON();
+      const created = { ...body, id: '99' };
+      await route.fulfill({ json: created });
+      return;
+    }
+  });
+
+  // Handle GET /api/franchise/* (user's franchises by ID)
+  await page.route('*/**/api/franchise/*', async (route) => {
+    const method = route.request().method();
+    if (method === 'GET') {
+      // GET /api/franchise/:id - returns array
+      const franchises = [{ id: '3', name: 'MyFranchise', stores: [{ id: '10', name: 'Main St' }] }];
+      await route.fulfill({ json: franchises });
+      return;
+    }
+    if (method === 'DELETE') {
+      await route.fulfill({ status: 200 });
+      return;
+    }
+    await route.fulfill({ status: 200 });
+  });
+
+  // Create/close store
+  await page.route(/\/api\/franchise\/.+\/store(\/.*)?$/, async (route) => {
+    const method = route.request().method();
+    if (method === 'POST') {
+      const body = route.request().postDataJSON();
+      const created = { ...body, id: '77' };
+      await route.fulfill({ json: created });
+      return;
+    }
+    if (method === 'DELETE') {
+      await route.fulfill({ status: 200 });
+      return;
+    }
+    await route.fulfill({ status: 200 });
+  });
+
+  // Docs
+  await page.route('*/**/api/docs', async (route) => {
+    await route.fulfill({ json: { endpoints: [] } });
+  });
+
   await page.goto('/');
 
 }
@@ -47,3 +133,38 @@ test('login as franchisee', async ({ page }) => {
     await expect(page.getByRole('link', { name: /^O$/ })).toBeVisible();
 });
 
+test('franchisee can view franchise dashboard', async ({ page }) => {
+  await basicInit(page);
+  
+  // Login as franchisee
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
+  await page.getByRole('textbox', { name: 'Password' }).fill('f');
+  await page.getByRole('button', { name: 'Login' }).click();
+
+  // Wait for login to complete (user avatar visible)
+  await expect(page.getByRole('link', { name: /^O$/ })).toBeVisible();
+
+  // Navigate to franchise dashboard
+  await page.goto('/franchise-dashboard');
+  
+  // Verify franchise dashboard displays with franchise data
+  await expect(page.locator('body')).toContainText('MyFranchise');
+  await expect(page.locator('table')).toContainText('Main St');
+});
+
+test('create new store', async ({ page }) => {
+  await basicInit(page);
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
+  await page.getByRole('textbox', { name: 'Password' }).click();
+  await page.getByRole('textbox', { name: 'Password' }).fill('f');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
+  await page.getByRole('button', { name: 'Create store' }).click();
+  await page.getByRole('textbox', { name: 'store name' }).click();
+  await page.getByRole('textbox', { name: 'store name' }).fill('test');
+  await page.getByRole('button', { name: 'Create' }).click();
+  
+});
