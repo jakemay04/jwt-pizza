@@ -108,3 +108,15 @@ await page.route('*/**/api/auth', async (route) => {
 
   await page.goto('/');
 }
+
+export async function badJWTPizza(page: Page) {
+    await page.route('*/**/api/order', async (route) => {
+        if (route.request().method() === 'POST') {
+        const orderReq = route.request().postDataJSON();
+        const orderRes = { order: { ...orderReq, id: 23 }, jwt: 'bad.jwt.token' };
+        await route.fulfill({ json: orderRes });
+        return;
+        }
+        await route.fulfill({ status: 200 });
+    });
+}  

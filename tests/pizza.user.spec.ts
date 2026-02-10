@@ -3,6 +3,7 @@ import { Page } from '@playwright/test';
 import { Role, User } from '../src/service/pizzaService';
 import { basicInit } from './backendUser';
 import { franchiseInit } from './backendFranchisee';
+import { badJWTPizza } from './backendUser';
 
 
 test('login', async ({ page }) => {
@@ -92,4 +93,31 @@ test('register', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Password' }).fill('test');
   await page.getByRole('button', { name: 'Register' }).click();
   await expect(page.getByRole('link', { name: 't', exact: true })).toBeVisible();
+});
+
+test('delivery of bad jwt pizza', async ({ page }) => {
+  await basicInit(page);
+  await badJWTPizza(page);
+  await page.getByRole('button', { name: 'Order now' }).click();
+  await page.getByRole('combobox').selectOption('4');
+  await page.getByRole('link', { name: 'Image Description Veggie A' }).click();
+  await page.getByRole('button', { name: 'Checkout' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com');
+  await page.getByRole('textbox', { name: 'Password' }).fill('a');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.getByRole('button', { name: 'Pay now' }).click();
+  await page.getByRole('button', { name: 'Verify' }).click();
+  await expect(page.getByText('invalid JWT. Looks like you have a bad pizza!')).toBeVisible();
+});
+
+test('about page', async ({ page }) => {
+  await basicInit(page);
+  await page.getByRole('link', { name: 'About' }).click();
+  await expect(page.getByText('The secret sauce')).toBeVisible();
+});
+
+test('history page', async ({ page }) => {
+  await basicInit(page);
+  await page.getByRole('link', { name: 'History' }).click();
+  await expect(page.getByText('Mama Rucci')).toBeVisible();
 });
