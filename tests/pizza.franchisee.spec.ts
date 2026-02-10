@@ -104,19 +104,27 @@ async function basicInit(page: Page) {
   // Create/close store
   await page.route(/\/api\/franchise\/.+\/store(\/.*)?$/, async (route) => {
     const method = route.request().method();
+    const url = route.request().url();
+    console.log(`🔷 Store route: ${method} ${url}`);
+    
     if (method === 'POST') {
       const body = route.request().postDataJSON();
       const newStore = { ...body, id: String(Date.now()) };
+      console.log(`  ➕ Creating store:`, newStore.name);
       // Add store to franchise's stores list
       franchise.stores = [...(franchise.stores || []), newStore];
+      console.log(`  📋 Franchise now has stores:`, franchise.stores.map(s => s.name));
       await route.fulfill({ json: newStore });
       return;
     }
     if (method === 'DELETE') {
       // Remove store from franchise's stores list
-      const url = route.request().url();
-      const storeId = url.split('/').pop();
+      const urlParts = url.split('/');
+      const storeId = urlParts[urlParts.length - 1];
+      console.log(`  ❌ Closing store ID: ${storeId}`);
+      console.log(`  📋 Stores before delete:`, franchise.stores.map(s => ({ id: s.id, name: s.name })));
       franchise.stores = (franchise.stores || []).filter(s => s.id !== storeId);
+      console.log(`  📋 Stores after delete:`, franchise.stores.map(s => ({ id: s.id, name: s.name })));
       await route.fulfill({ status: 200 });
       return;
     }
@@ -189,5 +197,21 @@ test('close store', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Password' }).fill('f');
   await page.getByRole('button', { name: 'Login' }).click();
   await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
-  await page.getByRole('button', { name: 'Close' }).click();
+  await expect(page.locator('table')).toContainText('Main St');
+  await page.locator('button:has-text("Close")').first().click();
+  await expect(page.getByText('Sorry to see you go')).toBeVisible();
+  
+  // wait for delete
+  const deleteResponse = page.waitForResponse(response => 
+    response.url().includes('/api/franchise/') && 
+    response.url().includes('/store/') && 
+    response.request().method() === 'DELETE'
+  );
+  
+  await page.getByRole('button').filter({ hasText: /^Close$/ }).first().click();
+  await deleteResponse;
+  await page.waitForTimeout(500);
+  await page.goto('/franchise-dashboard');
+  
+  await expect(page.locator('table')).not.toContainText('Main St');
 });
