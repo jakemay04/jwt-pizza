@@ -6,6 +6,9 @@ async function basicInit(page: Page) {
   let loggedInUser: User | undefined;
   const validUsers: Record<string, User> = { 'f@jwt.com': { id: '3', name: 'Orem', email: 'f@jwt.com', password: 'f', roles: [{ role: Role.Franchisee }] } };
   
+  // Track stores in state so they persist across API calls
+  let franchise = { id: '3', name: 'MyFranchise', stores: [{ id: '10', name: 'Main St' }] };
+  
   await page.route('*/**/api/auth', async (route) => {
     if (route.request().method() === 'DELETE') {
       loggedInUser = undefined;
@@ -86,8 +89,8 @@ async function basicInit(page: Page) {
   await page.route('*/**/api/franchise/*', async (route) => {
     const method = route.request().method();
     if (method === 'GET') {
-      // GET /api/franchise/:id - returns array
-      const franchises = [{ id: '3', name: 'MyFranchise', stores: [{ id: '10', name: 'Main St' }] }];
+      // GET /api/franchise/:id - returns array with current franchise state
+      const franchises = [franchise];
       await route.fulfill({ json: franchises });
       return;
     }
@@ -103,11 +106,17 @@ async function basicInit(page: Page) {
     const method = route.request().method();
     if (method === 'POST') {
       const body = route.request().postDataJSON();
-      const created = { ...body, id: '77' };
-      await route.fulfill({ json: created });
+      const newStore = { ...body, id: String(Date.now()) };
+      // Add store to franchise's stores list
+      franchise.stores = [...(franchise.stores || []), newStore];
+      await route.fulfill({ json: newStore });
       return;
     }
     if (method === 'DELETE') {
+      // Remove store from franchise's stores list
+      const url = route.request().url();
+      const storeId = url.split('/').pop();
+      franchise.stores = (franchise.stores || []).filter(s => s.id !== storeId);
       await route.fulfill({ status: 200 });
       return;
     }
@@ -167,4 +176,18 @@ test('create new store', async ({ page }) => {
   await page.getByRole('textbox', { name: 'store name' }).fill('test');
   await page.getByRole('button', { name: 'Create' }).click();
   
+  // Verify new store appears in dashboard
+  await expect(page.locator('table')).toContainText('test');
+});
+
+test('close store', async ({ page }) => {
+  await basicInit(page);
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
+  await page.getByRole('textbox', { name: 'Password' }).click();
+  await page.getByRole('textbox', { name: 'Password' }).fill('f');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
 });
