@@ -8,6 +8,11 @@ async function basicInit(page: Page) {
 
   // Authorize login for the given user
   await page.route('*/**/api/auth', async (route) => {
+    if (route.request().method() === 'DELETE') {
+      loggedInUser = undefined;
+      await route.fulfill({ status: 200 });
+      return;
+    }
     const loginReq = route.request().postDataJSON();
     const user = validUsers[loginReq.email];
     if (!user || user.password !== loginReq.password) {
