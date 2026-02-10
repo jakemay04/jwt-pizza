@@ -26,11 +26,24 @@ async function basicInit(page: Page) {
     expect(route.request().method()).toBe('PUT');
     await route.fulfill({ json: loginRes });
   });
+
+  // Return the currently logged in user
   await page.route('*/**/api/user/me', async (route) => {
     expect(route.request().method()).toBe('GET');
     await route.fulfill({ json: loggedInUser });
   });
 
-  
+  await page.goto('/');
 
+}
+
+test('login as franchisee', async ({ page }) => {
+  await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('f');
+    await page.getByRole('button', { name: 'Login' }).click();
+
+    await expect(page.getByRole('link', { name: /^O$/ })).toBeVisible();
 });
+
