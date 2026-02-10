@@ -24,45 +24,59 @@ export async function adminInit(page: Page) {
     await route.fulfill({ json: adminUser });
   });
 
-  // 3. Mock Franchise List (Supports pagination and filtering)
-  await page.route(/\/api\/franchise(\?.*)?$/, async (route) => {
-    const url = new URL(route.request().url());
-    const filter = url.searchParams.get('filter') || '*';
-    
-    const mockData: FranchiseList = {
-      franchises: [
-        {
-          id: 1,
-          name: 'Ricci Originals',
-          admins: [{ id: '10', name: 'Mario', email: 'm@pizza.com' }],
-          stores: [
-            { id: 101, name: 'Venice Store', totalRevenue: 1500 },
-            { id: 102, name: 'Rome Store', totalRevenue: 2800 }
-          ],
-        },
-        {
-          id: 2,
-          name: 'Mama Pizza',
-          admins: [{ id: '11', name: 'Luigi', email: 'l@pizza.com' }],
-          stores: [],
-        }
-      ],
-      more: false
-    };
-
-    // Filter logic to match the filterFranchises function in the component
-    if (filter !== '*') {
-      const query = filter.replace(/\*/g, '').toLowerCase();
-      mockData.franchises = mockData.franchises.filter(f => 
-        f.name.toLowerCase().includes(query)
-      );
+  // 3. Mock Franchise Endpoints (List & Creation)
+  await page.route(/\/api\/franchise/, async (route) => {
+    // Handle POST (Franchise Creation)
+    if (route.request().method() === 'POST') {
+      // Check authorization
+      const authHeader = route.request().headerValue('Authorization');
+      if (!authHeader || authHeader !== 'Bearer admin-token-123') {
+        await route.fulfill({ status: 401, json: { code: 401, message: 'unauthorized' } });
+        return;
+      }
+      const requestData = route.request().postDataJSON();
+      await route.fulfill({ json: { ...requestData, id: '999', stores: [] } });
     }
+    // Handle GET (Franchise List)
+    else {
+      const url = new URL(route.request().url());
+      const filter = url.searchParams.get('filter') || url.searchParams.get('name') || '*';
+      
+      const mockData: FranchiseList = {
+        franchises: [
+          {
+            id: '1',
+            name: 'Ricci Originals',
+            admins: [{ id: '10', name: 'Mario', email: 'm@pizza.com' }],
+            stores: [
+              { id: '101', name: 'Venice Store', totalRevenue: 1500 },
+              { id: '102', name: 'Rome Store', totalRevenue: 2800 }
+            ],
+          },
+          {
+            id: '2',
+            name: 'Mama Pizza',
+            admins: [{ id: '11', name: 'Luigi', email: 'l@pizza.com' }],
+            stores: [],
+          }
+        ],
+        more: false
+      };
 
-    await route.fulfill({ json: mockData });
+      // Filter logic to match the filterFranchises function in the component
+      if (filter !== '*') {
+        const query = filter.replace(/\*/g, '').toLowerCase();
+        mockData.franchises = mockData.franchises.filter(f => 
+          f.name.toLowerCase().includes(query)
+        );
+      }
+
+      await route.fulfill({ json: mockData });
+    }
   });
 
   // 4. Mock Order Menu (to prevent errors during navigation)
   await page.route('*/**/api/order/menu', async (route) => {
     await route.fulfill({ json: [] });
   });
-}
+}  

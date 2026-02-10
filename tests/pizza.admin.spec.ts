@@ -36,4 +36,5 @@ test('admin can navigate to create franchise page', async ({ page }) => {
     await page.getByRole('textbox', { name: 'franchisee admin email' }).click();
     await page.getByRole('textbox', { name: 'franchisee admin email' }).fill('test@test.com');
     await page.getByRole('button', { name: 'Create' }).click();
+    await expect(page.getByText('test')).toBeVisible();
 });
