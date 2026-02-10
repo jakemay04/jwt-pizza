@@ -103,15 +103,12 @@ export async function franchiseInit(page: Page) {
   await page.route(/\/api\/franchise\/.+\/store(\/.*)?$/, async (route) => {
     const method = route.request().method();
     const url = route.request().url();
-    console.log(`🔷 Store route: ${method} ${url}`);
     
     if (method === 'POST') {
       const body = route.request().postDataJSON();
       const newStore = { ...body, id: String(Date.now()) };
-      console.log(`  ➕ Creating store:`, newStore.name);
       // Add store to franchise's stores list
       franchise.stores = [...(franchise.stores || []), newStore];
-      console.log(`  📋 Franchise now has stores:`, franchise.stores.map(s => s.name));
       await route.fulfill({ json: newStore });
       return;
     }

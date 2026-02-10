@@ -6,32 +6,40 @@ export async function basicInit(page: Page) {
   let loggedInUser: User | undefined;
   const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] } };
 
-  // Authorize login for the given user
-  await page.route('*/**/api/auth', async (route) => {
-    if (route.request().method() === 'DELETE') {
-      loggedInUser = undefined;
-      await route.fulfill({ status: 200 });
-      return;
-    }
-    const loginReq = route.request().postDataJSON();
-    const user = validUsers[loginReq.email];
-    if (!user || user.password !== loginReq.password) {
+    // backendUser.ts - combined auth handler
+await page.route('*/**/api/auth', async (route) => {
+  const method = route.request().method();
+  const data = route.request().postDataJSON();
+
+  if (method === 'POST') {
+    // REGISTER
+    const newUser: User = {
+      id: String(Object.keys(validUsers).length + 1),
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      roles: [{ role: Role.Diner }],
+    };
+    validUsers[data.email] = newUser;
+    loggedInUser = newUser; // Sets state for /api/user/me
+    await route.fulfill({ status: 201, json: { user: newUser, token: 'abcdef' } });
+
+  } else if (method === 'PUT') {
+    // LOGIN
+    const user = validUsers[data.email];
+    if (!user || user.password !== data.password) {
       await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
       return;
     }
-    loggedInUser = validUsers[loginReq.email];
-    const loginRes = {
-      user: loggedInUser,
-      token: 'abcdef',
-      await page.getByRole('textbox', { name: 'Email address' }).click();
-      await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com');
-      await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
-      await page.getByRole('textbox', { name: 'Password' }).fill('a');
-      await page.getByRole('button', { name: 'Login' }).click();
-    };
-    expect(route.request().method()).toBe('PUT');
-    await route.fulfill({ json: loginRes });
-  });
+    loggedInUser = user;
+    await route.fulfill({ json: { user: loggedInUser, token: 'abcdef' } });
+
+  } else if (method === 'DELETE') {
+    // LOGOUT
+    loggedInUser = undefined;
+    await route.fulfill({ status: 200 });
+  }
+});
 
   // Return the currently logged in user
   await page.route('*/**/api/user/me', async (route) => {
@@ -84,14 +92,19 @@ export async function basicInit(page: Page) {
 
   // Order a pizza.
   await page.route('*/**/api/order', async (route) => {
+    if (route.request().method() === 'POST') {
     const orderReq = route.request().postDataJSON();
     const orderRes = {
       order: { ...orderReq, id: 23 },
       jwt: 'eyJpYXQ',
     };
-    expect(route.request().method()).toBe('POST');
     await route.fulfill({ json: orderRes });
-  });
+  } else {
+    // If it's a GET (like fetching order history), provide a default empty list or continue
+    await route.fulfill({ json: { orders: [], count: 0 } });
+  }
+
+});
 
   await page.goto('/');
 }

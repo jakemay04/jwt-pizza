@@ -6,13 +6,18 @@ import { franchiseInit } from './backendFranchisee';
 
 
 test('login', async ({ page }) => {
-  await basicInit(page);
-  await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com');
-  await page.getByRole('textbox', { name: 'Password' }).fill('a');
+  await basicInit(page); // Must be first
+  await page.goto('/login');
+  
+  await page.getByPlaceholder('Email address').fill('d@jwt.com');
+  await page.getByPlaceholder('Password').fill('a');
   await page.getByRole('button', { name: 'Login' }).click();
 
-  await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
+  // Wait for the dashboard to load and the mock to return the user
+  await page.getByRole('link', { name: 'KC' }).click();
+  const nameValue = page.locator('.col-span-4').first();
+  await expect(nameValue).toBeVisible();
+  await expect(nameValue).toHaveText('Kai Chen');
 });
 
 test('purchase with login', async ({ page }) => {
@@ -76,4 +81,15 @@ test('comfirm logged out', async ({ page }) => {
   //test logout
   await page.getByRole('link', { name: 'Logout' }).click();
   await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
+});
+
+test('register', async ({ page }) => {
+  await basicInit(page);
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('link', { name: 'Register' }).click();
+  await page.getByRole('textbox', { name: 'Name' }).fill('test');
+  await page.getByRole('textbox', { name: 'Email address' }).fill('test@test.com');
+  await page.getByRole('textbox', { name: 'Password' }).fill('test');
+  await page.getByRole('button', { name: 'Register' }).click();
+  await expect(page.getByRole('link', { name: 't', exact: true })).toBeVisible();
 });

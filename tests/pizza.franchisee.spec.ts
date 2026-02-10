@@ -23,7 +23,6 @@ test('franchisee can view franchise dashboard', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Password' }).fill('f');
   await page.getByRole('button', { name: 'Login' }).click();
 
-  // Wait for login to complete (user avatar visible)
   await expect(page.getByRole('link', { name: /^O$/ })).toBeVisible();
 
   // Navigate to franchise dashboard
@@ -85,12 +84,13 @@ test('store revenue updates after order', async ({ page }) => {
   await basicInit(page);
   await page.getByRole('link', { name: 'Login' }).click();
   await page.getByRole('textbox', { name: 'Email address' }).click();
-  await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com')
+  await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com');
   await page.getByRole('textbox', { name: 'Password' }).click();
   await page.getByRole('textbox', { name: 'Password' }).fill('a');
   await page.getByRole('button', { name: 'Login' }).click();
-
-
-  
-
+  await page.getByRole('link', { name: 'Order' }).click();
+  // Select a store from the diner's mock (LotaPizza with store id 4)
+  await page.getByRole('combobox').selectOption('4');
+  await page.getByRole('link', { name: 'Image Description Veggie A' }).click();
+  await page.getByRole('button', { name: 'Checkout' }).click();
 });
