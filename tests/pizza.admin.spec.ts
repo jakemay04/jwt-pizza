@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test } from './collect-coverage';
+import { expect } from '@playwright/test';
 import { adminInit } from './backendAdmin';
 
 test('admin dashboard renders correctly', async ({ page }) => {
