@@ -98,4 +98,32 @@ export async function adminInit(page: Page) {
   await page.route('*/**/api/order/menu', async (route) => {
     await route.fulfill({ json: [] });
   });
+
+  // 5. Mock Close Franchise Endpoint
+  await page.route(/\/api\/franchise\/\d+/, async (route) => {
+    if (route.request().method() === 'DELETE') {
+      const authHeader = await route.request().headerValue('Authorization');
+      if (!authHeader || authHeader !== 'Bearer admin-token-123') {
+        await route.fulfill({ status: 401, json: { code: 401, message: 'unauthorized' } });
+        return;
+      }
+      await route.fulfill({ json: { message: 'franchise deleted' } });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // 6. Mock Close Store Endpoint
+  await page.route(/\/api\/franchise\/\d+\/store\/\d+/, async (route) => {
+    if (route.request().method() === 'DELETE') {
+      const authHeader = await route.request().headerValue('Authorization');
+      if (!authHeader || authHeader !== 'Bearer admin-token-123') {
+        await route.fulfill({ status: 401, json: { code: 401, message: 'unauthorized' } });
+        return;
+      }
+      await route.fulfill({ json: { message: 'store deleted' } });
+    } else {
+      await route.continue();
+    }
+  });
 }  
