@@ -6,7 +6,6 @@ export async function basicInit(page: Page) {
   let loggedInUser: User | undefined;
   const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] } };
 
-    // backendUser.ts - combined auth handler
 await page.route('*/**/api/auth', async (route) => {
   const method = route.request().method();
   const data = route.request().postDataJSON();
@@ -21,7 +20,7 @@ await page.route('*/**/api/auth', async (route) => {
       roles: [{ role: Role.Diner }],
     };
     validUsers[data.email] = newUser;
-    loggedInUser = newUser; // Sets state for /api/user/me
+    loggedInUser = newUser;
     await route.fulfill({ status: 201, json: { user: newUser, token: 'abcdef' } });
 
   } else if (method === 'PUT') {

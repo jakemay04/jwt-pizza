@@ -37,7 +37,6 @@ test('admin can navigate to create franchise page', async ({ page }) => {
     // Wait for token to be saved
     await page.waitForTimeout(500);
     const token = await page.evaluate(() => localStorage.getItem('token'));
-    console.log('Token after login:', token);
     
     await page.goto('/admin-dashboard');
     await page.getByRole('button', { name: 'Add Franchise' }).click();
@@ -54,14 +53,12 @@ test('admin can navigate to create franchise page', async ({ page }) => {
     
     // Check if we got an error message
     const errorMessage = await page.locator('text=unauthorized').isVisible().catch(() => false);
-    console.log('Error message visible:', errorMessage);
     
     // Wait a bit for navigation
     await page.waitForTimeout(1000);
     
     // Check if the text 'test' is visible (would show in franchise list if created)
     const isTestVisible = await page.getByText('test').isVisible().catch(() => false);
-    console.log('Is test visible:', isTestVisible);
     
     if (isTestVisible) {
       await expect(page.getByText('test')).toBeVisible();
@@ -141,7 +138,6 @@ test('admin can close store', async ({ page }) => {
   await page.goto('/admin-dashboard');
   
   // Find the Close button for a store (not franchise)
-  // Get all close buttons and click the second one (first is for franchise, rest are for stores)
   const closeButtons = page.getByRole('button', { name: /Close/ });
   const allButtons = await closeButtons.all();
   

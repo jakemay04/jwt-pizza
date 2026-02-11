@@ -2,7 +2,7 @@ import { Page, expect } from '@playwright/test';
 import { Role, User, FranchiseList, Franchise } from '../src/service/pizzaService';
 
 export async function adminInit(page: Page) {
-  // 1. Define the Admin User State
+  //initialize admin
   const adminUser: User = {
     id: '1',
     name: 'Mama Ricci',
@@ -11,14 +11,11 @@ export async function adminInit(page: Page) {
     roles: [{ role: Role.Admin }],
   };
 
-  // Track created franchises so GET requests include them
   const createdFranchises: Franchise[] = [];
 
-  // Set up all mocks BEFORE navigating to the page
   
-  // 2. Mock Auth & User State
+  //Mock Auth & User State
   await page.route('*/**/api/auth', async (route) => {
-    console.log('Mock /api/auth intercepted:', route.request().method());
     if (route.request().method() === 'PUT') {
       await route.fulfill({ json: { user: adminUser, token: 'admin-token-123' } });
     } else {
@@ -30,27 +27,22 @@ export async function adminInit(page: Page) {
     await route.fulfill({ json: adminUser });
   });
 
-  // 3. Mock Franchise Endpoints (List & Creation)
+  //Mock Franchise Endpoints (List & Creation)
   await page.route(/\/api\/franchise/, async (route) => {
-    console.log('Mock /api/franchise intercepted:', route.request().method(), route.request().url());
-    // Handle POST (Franchise Creation)
+    // handle franchise creation
     if (route.request().method() === 'POST') {
       // Check authorization
       const authHeader = await route.request().headerValue('Authorization');
-      console.log('Authorization header:', authHeader);
       if (!authHeader || authHeader !== 'Bearer admin-token-123') {
-        console.log('Authorization failed - rejecting with 401');
         await route.fulfill({ status: 401, json: { code: 401, message: 'unauthorized' } });
         return;
       }
-      console.log('Authorization successful - creating franchise');
       const requestData = route.request().postDataJSON();
       const newFranchise: Franchise = { ...requestData, id: String(createdFranchises.length + 999), stores: [] };
       createdFranchises.push(newFranchise);
-      console.log('Added franchise to tracking:', newFranchise);
       await route.fulfill({ json: newFranchise });
     }
-    // Handle GET (Franchise List)
+    // handle franchise list
     else {
       const url = new URL(route.request().url());
       const filter = url.searchParams.get('filter') || url.searchParams.get('name') || '*';
@@ -74,7 +66,6 @@ export async function adminInit(page: Page) {
         }
       ];
 
-      // Add any created franchises
       allFranchises.push(...createdFranchises);
 
       const mockData: FranchiseList = {
@@ -82,7 +73,6 @@ export async function adminInit(page: Page) {
         more: false
       };
 
-      // Filter logic to match the filterFranchises function in the component
       if (filter !== '*') {
         const query = filter.replace(/\*/g, '').toLowerCase();
         mockData.franchises = mockData.franchises.filter(f => 
@@ -94,12 +84,12 @@ export async function adminInit(page: Page) {
     }
   });
 
-  // 4. Mock Order Menu (to prevent errors during navigation)
+  // Mock order menu endpoint
   await page.route('*/**/api/order/menu', async (route) => {
     await route.fulfill({ json: [] });
   });
 
-  // 5. Mock Close Franchise Endpoint
+  // Mock close franchise endpoint
   await page.route(/\/api\/franchise\/\d+/, async (route) => {
     if (route.request().method() === 'DELETE') {
       const authHeader = await route.request().headerValue('Authorization');
@@ -113,7 +103,7 @@ export async function adminInit(page: Page) {
     }
   });
 
-  // 6. Mock Close Store Endpoint
+  // Mock close store endpoint
   await page.route(/\/api\/franchise\/\d+\/store\/\d+/, async (route) => {
     if (route.request().method() === 'DELETE') {
       const authHeader = await route.request().headerValue('Authorization');

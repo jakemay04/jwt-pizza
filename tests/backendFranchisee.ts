@@ -107,13 +107,11 @@ export async function franchiseInit(page: Page) {
     if (method === 'POST') {
       const body = route.request().postDataJSON();
       const newStore = { ...body, id: String(Date.now()) };
-      // Add store to franchise's stores list
       franchise.stores = [...(franchise.stores || []), newStore];
       await route.fulfill({ json: newStore });
       return;
     }
     if (method === 'DELETE') {
-      // Remove store from franchise's stores list
       const urlParts = url.split('/');
       const storeId = urlParts[urlParts.length - 1];
       franchise.stores = (franchise.stores || []).filter(s => s.id !== storeId);
