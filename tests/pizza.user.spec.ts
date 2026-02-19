@@ -105,9 +105,10 @@ test('delivery of bad jwt pizza', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com');
   await page.getByRole('textbox', { name: 'Password' }).fill('a');
   await page.getByRole('button', { name: 'Login' }).click();
+  await expect(page.getByRole('main')).toContainText('Send me that pizza right now!');
   await page.getByRole('button', { name: 'Pay now' }).click();
   await page.getByRole('button', { name: 'Verify' }).click();
-  await expect(page.getByText('invalid JWT. Looks like you have a bad pizza!')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /JWT Pizza - invalid JWT\. Looks like you have a bad pizza!/ })).toBeVisible();
 });
 
 test('about page', async ({ page }) => {

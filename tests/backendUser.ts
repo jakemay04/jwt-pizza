@@ -47,7 +47,7 @@ await page.route('*/**/api/auth', async (route) => {
   });
 
   // Update a user profile
-  await page.route(/\/api\/user\/.+$/, async (route) => {
+  await page.route(/\/api\/user\/(?!me$).+$/, async (route) => {
     if (route.request().method() !== 'PUT') {
       await route.continue();
       return;
@@ -144,12 +144,20 @@ await page.route('*/**/api/auth', async (route) => {
 
 export async function badJWTPizza(page: Page) {
     await page.route('*/**/api/order', async (route) => {
-        if (route.request().method() === 'POST') {
-        const orderReq = route.request().postDataJSON();
-        const orderRes = { order: { ...orderReq, id: 23 }, jwt: 'bad.jwt.token' };
-        await route.fulfill({ json: orderRes });
-        return;
-        }
-        await route.fulfill({ status: 200 });
+    if (route.request().method() !== 'POST') {
+    await route.continue();
+    return;
+    }
+
+    const orderReq = route.request().postDataJSON();
+    const orderRes = { order: { ...orderReq, id: 23 }, jwt: 'bad.jwt.token' };
+    await route.fulfill({ json: orderRes });
+    });
+
+    await page.route('*/**/api/order/verify', async (route) => {
+      await route.fulfill({
+        status: 400,
+        json: { message: 'invalid JWT. Looks like you have a bad pizza!' },
+      });
     });
 }  
