@@ -1,8 +1,9 @@
 import { test, expect } from 'playwright-test-coverage';
+import { basicInit } from './backendUser';
 
 test('updateUser', async ({ page }) => {
+  await basicInit(page);
   const email = `user${Math.floor(Math.random() * 10000)}@jwt.com`;
-  await page.goto('/');
   await page.getByRole('link', { name: 'Register' }).click();
   await page.getByRole('textbox', { name: 'Full name' }).fill('pizza diner');
   await page.getByRole('textbox', { name: 'Email address' }).fill(email);
@@ -34,8 +35,8 @@ test('updateUser', async ({ page }) => {
 });
 
 test('updateUser password', async ({ page }) => {
+  await basicInit(page);
   const email = `user${Math.floor(Math.random() * 10000)}@jwt.com`;
-  await page.goto('/');
   await page.getByRole('link', { name: 'Register' }).click();
   await page.getByRole('textbox', { name: 'Full name' }).fill('pizza diner');
   await page.getByRole('textbox', { name: 'Email address' }).fill(email);
@@ -59,7 +60,7 @@ test('updateUser password', async ({ page }) => {
 });
 
 test('updateUser email', async ({ page }) => {
-  await page.goto('/');
+  await basicInit(page);
   await page.getByRole('link', { name: 'Register' }).click();
   await page.getByRole('textbox', { name: 'Full name' }).fill('pizza diner');
   await page.getByRole('textbox', { name: 'Email address' }).fill('123@test.com');

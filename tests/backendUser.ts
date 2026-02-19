@@ -46,6 +46,40 @@ await page.route('*/**/api/auth', async (route) => {
     await route.fulfill({ json: loggedInUser });
   });
 
+  // Update a user profile
+  await page.route(/\/api\/user\/.+$/, async (route) => {
+    if (route.request().method() !== 'PUT') {
+      await route.continue();
+      return;
+    }
+
+    const updatedUser = route.request().postDataJSON() as User;
+    const existingUser = Object.values(validUsers).find((user) => user.id === updatedUser.id);
+
+    if (!existingUser) {
+      await route.fulfill({ status: 404, json: { message: 'User not found' } });
+      return;
+    }
+
+    const mergedUser: User = {
+      ...existingUser,
+      ...updatedUser,
+      roles: updatedUser.roles ?? existingUser.roles,
+    };
+
+    if (updatedUser.email && updatedUser.email !== existingUser.email) {
+      delete validUsers[existingUser.email];
+    }
+
+    validUsers[mergedUser.email] = mergedUser;
+    loggedInUser = mergedUser;
+
+    await route.fulfill({
+      status: 200,
+      json: { user: mergedUser, token: 'abcdef' },
+    });
+  });
+
   // A standard menu
   await page.route('*/**/api/order/menu', async (route) => {
     const menuRes = [
