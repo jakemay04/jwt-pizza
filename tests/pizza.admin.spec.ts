@@ -239,17 +239,22 @@ test('admin list users page', async ({ page }) => {
   await page.getByPlaceholder('Password').fill('admin');
   await page.getByRole('button', { name: 'Login' }).click();
   await page.goto('/admin-dashboard');
-  await page.getByRole('heading', { name: 'Users' }).click();
+  await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Users', exact: true })).toBeVisible();
 });
 
-test('new user appears on list users page', async ({ page }) => {
-  
-
+test('admin users list includes mock users', async ({ page }) => {
   await adminInit(page);
   await page.goto('/login');
   await page.getByPlaceholder('Email address').fill('admin@jwt.com');
   await page.getByPlaceholder('Password').fill('admin');
   await page.getByRole('button', { name: 'Login' }).click();
   await page.goto('/admin-dashboard');
-  await page.getByRole('heading', { name: 'Users' }).click();
+  
+  // Wait for the users table to load
+  await page.waitForSelector('table', { timeout: 5000 });
+  
+  // Verify at least one user from the mock is visible
+  await expect(page.getByRole('cell', { name: 'Mario' }).nth(1)).toBeVisible();
+  
 });
