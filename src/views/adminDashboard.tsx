@@ -61,17 +61,6 @@ export default function AdminDashboard(props: Props) {
     setFranchiseList(await pizzaService.getFranchises(franchisePage, 10, `*${filterFranchiseRef.current?.value}*`));
   }
 
-  async function deleteUser(user: User) {
-    if (!user.id) {
-      return;
-    }
-    await pizzaService.deleteUser(user);
-    setUserList((prev) => ({
-      users: prev.users.filter((u) => u.id !== user.id),
-      more: prev.more,
-    }));
-  }
-
   async function filterUsers() {
     const users: User[] = [];
     let page = 0;
@@ -86,6 +75,32 @@ export default function AdminDashboard(props: Props) {
     }
 
     setUserList({ users, more: false });
+  }
+
+  async function deleteUser(user: User) {
+    if (!confirm(`Are you sure you want to delete ${user.email}?`)) {
+      return;
+    }
+
+    try {
+      await pizzaService.deleteUser(user);
+      // Refresh the user list after deletion
+      const users: User[] = [];
+      let page = 0;
+      let more = true;
+
+      while (more) {
+        const result = await pizzaService.getUsers(page, 50, '*');
+        users.push(...result.users);
+        more = result.more;
+        page += 1;
+      }
+
+      setUserList({ users, more: false });
+    } catch (err: any) {
+      console.error('Delete failed:', err);
+      alert(`Failed to delete user: ${err.message || 'Unknown error'}`);
+    }
   }
 
   let response = <NotFound />;
@@ -217,7 +232,6 @@ export default function AdminDashboard(props: Props) {
                                     X
                                   </button>
                                 </td>
-                              <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium text-gray-500">—</td>
                             </tr>
                           </tbody>
                         ))
