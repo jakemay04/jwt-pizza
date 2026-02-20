@@ -80,8 +80,8 @@ test('admin can filter franchises', async ({ page }) => {
   
   // Filter for 'Ricci'
   await page.getByPlaceholder('Filter franchises').fill('Ricci');
-  await page.getByRole('button', { name: 'Submit' }).click();
   
+  await page.getByRole('cell', { name: 'Ricci Submit' }).getByRole('button').click();
   await page.waitForTimeout(500);
   
   // Only 'Ricci Originals' should be visible

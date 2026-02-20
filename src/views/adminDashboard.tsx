@@ -48,10 +48,12 @@ export default function AdminDashboard(props: Props) {
   }
 
   async function filterFranchises() {
-    setFranchiseList(await pizzaService.getFranchises(franchisePage, 10, `*${filterFranchiseRef.current?.value}*`));
+    setFranchisePage(0);
+    setFranchiseList(await pizzaService.getFranchises(0, 3, `*${filterFranchiseRef.current?.value}*`));
   }
 
   async function filterUsers() {
+    setUserPage(0);
     const nameFilter = `*${filterUserRef.current?.value ?? ''}*`;
     const result = await pizzaService.getUsers(0, 10, nameFilter);
     setUserList(result);
