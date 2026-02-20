@@ -27,6 +27,23 @@ export async function adminInit(page: Page) {
     await route.fulfill({ json: adminUser });
   });
 
+  await page.route(/\/api\/user(\?.*)?$/, async (route) => {
+    if (route.request().method() !== 'GET') {
+      await route.fulfill({ status: 405, json: { message: 'Method not allowed' } });
+      return;
+    }
+
+    await route.fulfill({
+      json: {
+        users: [
+          { id: '10', name: 'Mario', email: 'm@pizza.com' },
+          { id: '11', name: 'Luigi', email: 'l@pizza.com' },
+        ],
+        more: false,
+      },
+    });
+  });
+
   //Mock Franchise Endpoints (List & Creation)
   await page.route(/\/api\/franchise/, async (route) => {
     // handle franchise creation

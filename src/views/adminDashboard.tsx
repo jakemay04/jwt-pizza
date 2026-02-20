@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import NotFound from './notFound';
 import Button from '../components/button';
 import { pizzaService } from '../service/service';
-import { Franchise, FranchiseList, Role, Store, User } from '../service/pizzaService';
+import { Franchise, FranchiseList, Role, Store, User, UserList } from '../service/pizzaService';
 import { TrashIcon } from '../icons';
 
 interface Props {
@@ -16,12 +16,34 @@ export default function AdminDashboard(props: Props) {
   const [franchiseList, setFranchiseList] = React.useState<FranchiseList>({ franchises: [], more: false });
   const [franchisePage, setFranchisePage] = React.useState(0);
   const filterFranchiseRef = React.useRef<HTMLInputElement>(null);
+  const [userList, setUserList] = React.useState<UserList>({ users: [], more: false });
+  const [userPage, setUserPage] = React.useState(0);
+  const filterUserRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     (async () => {
       setFranchiseList(await pizzaService.getFranchises(franchisePage, 3, '*'));
     })();
   }, [props.user, franchisePage]);
+
+  React.useEffect(() => {
+    (async () => {
+      if (Role.isRole(props.user, Role.Admin)) {
+        const users: User[] = [];
+        let page = 0;
+        let more = true;
+
+        while (more) {
+          const result = await pizzaService.getUsers(page, 50, '*');
+          users.push(...result.users);
+          more = result.more;
+          page += 1;
+        }
+
+        setUserList({ users, more: false });
+      }
+    })();
+  }, [props.user, userPage]);
 
   function createFranchise() {
     navigate('/admin-dashboard/create-franchise');
@@ -37,6 +59,22 @@ export default function AdminDashboard(props: Props) {
 
   async function filterFranchises() {
     setFranchiseList(await pizzaService.getFranchises(franchisePage, 10, `*${filterFranchiseRef.current?.value}*`));
+  }
+
+  async function filterUsers() {
+    const users: User[] = [];
+    let page = 0;
+    let more = true;
+    const nameFilter = `*${filterUserRef.current?.value ?? ''}*`;
+
+    while (more) {
+      const result = await pizzaService.getUsers(page, 50, nameFilter);
+      users.push(...result.users);
+      more = result.more;
+      page += 1;
+    }
+
+    setUserList({ users, more: false });
   }
 
   let response = <NotFound />;
@@ -60,8 +98,16 @@ export default function AdminDashboard(props: Props) {
                           ))}
                         </tr>
                       </thead>
-                      {franchiseList.franchises.map((franchise, findex) => {
-                        return (
+                      {franchiseList.franchises.length === 0 ? (
+                        <tbody className="divide-y divide-gray-200">
+                          <tr className="border-neutral-500 border-t-2">
+                            <td className="px-2 py-3 text-sm text-gray-800" colSpan={3}>
+                              No franchises found.
+                            </td>
+                          </tr>
+                        </tbody>
+                      ) : (
+                        franchiseList.franchises.map((franchise, findex) => (
                           <tbody key={findex} className="divide-y divide-gray-200">
                             <tr className="border-neutral-500 border-t-2">
                               <td className="text-start px-2 whitespace-nowrap text-l font-mono text-orange-600">{franchise.name}</td>
@@ -76,25 +122,23 @@ export default function AdminDashboard(props: Props) {
                               </td>
                             </tr>
 
-                            {franchise.stores.map((store, sindex) => {
-                              return (
-                                <tr key={sindex} className="bg-neutral-100">
-                                  <td className="text-end px-2 whitespace-nowrap text-sm text-gray-800" colSpan={3}>
-                                    {store.name}
-                                  </td>
-                                  <td className="text-end px-2 whitespace-nowrap text-sm text-gray-800">{store.totalRevenue?.toLocaleString()} ₿</td>
-                                  <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium">
-                                    <button type="button" className="px-2 py-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-1 border-orange-400 text-orange-400 hover:border-orange-800 hover:text-orange-800" onClick={() => closeStore(franchise, store)}>
-                                      <TrashIcon />
-                                      Close
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
+                            {franchise.stores.map((store, sindex) => (
+                              <tr key={sindex} className="bg-neutral-100">
+                                <td className="text-end px-2 whitespace-nowrap text-sm text-gray-800" colSpan={3}>
+                                  {store.name}
+                                </td>
+                                <td className="text-end px-2 whitespace-nowrap text-sm text-gray-800">{store.totalRevenue?.toLocaleString()} ₿</td>
+                                <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium">
+                                  <button type="button" className="px-2 py-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-1 border-orange-400 text-orange-400 hover:border-orange-800 hover:text-orange-800" onClick={() => closeStore(franchise, store)}>
+                                    <TrashIcon />
+                                    Close
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
                           </tbody>
-                        );
-                      })}
+                        ))
+                      )}
                       <tfoot>
                         <tr>
                           <td className="px-1 py-1">
@@ -141,54 +185,38 @@ export default function AdminDashboard(props: Props) {
                           ))}
                         </tr>
                       </thead>
-                      {franchiseList.franchises.map((franchise, findex) => {
-                        return (
-                          <tbody key={findex} className="divide-y divide-gray-200">
+                      {userList.users.length === 0 ? (
+                        <tbody className="divide-y divide-gray-200">
+                          <tr className="border-neutral-500 border-t-2">
+                            <td className="px-2 py-3 text-sm text-gray-800" colSpan={3}>
+                              No users found.
+                            </td>
+                          </tr>
+                        </tbody>
+                      ) : (
+                        userList.users.map((user, index) => (
+                          <tbody key={user.id ?? user.email ?? index} className="divide-y divide-gray-200">
                             <tr className="border-neutral-500 border-t-2">
-                              <td className="text-start px-2 whitespace-nowrap text-l font-mono text-orange-600">{franchise.name}</td>
-                              <td className="text-start px-2 whitespace-nowrap text-sm font-normal text-gray-800" colSpan={3}>
-                                {franchise.admins?.map((o) => o.name).join(', ')}
-                              </td>
-                              <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium">
-                                <button type="button" className="px-2 py-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-1 border-orange-400 text-orange-400  hover:border-orange-800 hover:text-orange-800" onClick={() => closeFranchise(franchise)}>
-                                  <TrashIcon />
-                                  Close
-                                </button>
-                              </td>
+                              <td className="text-start px-2 whitespace-nowrap text-sm font-normal text-gray-800">{user.name ?? 'Unknown'}</td>
+                              <td className="text-start px-2 whitespace-nowrap text-sm font-normal text-gray-800">{user.email ?? '—'}</td>
+                              <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium text-gray-500">—</td>
                             </tr>
-
-                            {franchise.stores.map((store, sindex) => {
-                              return (
-                                <tr key={sindex} className="bg-neutral-100">
-                                  <td className="text-end px-2 whitespace-nowrap text-sm text-gray-800" colSpan={3}>
-                                    {store.name}
-                                  </td>
-                                  <td className="text-end px-2 whitespace-nowrap text-sm text-gray-800">{store.totalRevenue?.toLocaleString()} ₿</td>
-                                  <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium">
-                                    <button type="button" className="px-2 py-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-1 border-orange-400 text-orange-400 hover:border-orange-800 hover:text-orange-800" onClick={() => closeStore(franchise, store)}>
-                                      <TrashIcon />
-                                      Close
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
                           </tbody>
-                        );
-                      })}
+                        ))
+                      )}
                       <tfoot>
                         <tr>
                           <td className="px-1 py-1">
-                            <input type="text" ref={filterFranchiseRef} name="filterFranchise" placeholder="Filter franchises" className="px-2 py-1 text-sm border border-gray-300 rounded-lg" />
-                            <button type="submit" className="ml-2 px-2 py-1 text-sm font-semibold rounded-lg border border-orange-400 text-orange-400 hover:border-orange-800 hover:text-orange-800" onClick={filterFranchises}>
+                            <input type="text" ref={filterUserRef} name="filterUser" placeholder="Filter users" className="px-2 py-1 text-sm border border-gray-300 rounded-lg" />
+                            <button type="submit" className="ml-2 px-2 py-1 text-sm font-semibold rounded-lg border border-orange-400 text-orange-400 hover:border-orange-800 hover:text-orange-800" onClick={filterUsers}>
                               Submit
                             </button>
                           </td>
-                          <td colSpan={4} className="text-end text-sm font-medium">
-                            <button className="w-12 p-1 text-sm font-semibold rounded-lg border border-transparent bg-white text-grey border-grey m-1 hover:bg-orange-200 disabled:bg-neutral-300 " onClick={() => setFranchisePage(franchisePage - 1)} disabled={franchisePage <= 0}>
+                          <td colSpan={2} className="text-end text-sm font-medium">
+                            <button className="w-12 p-1 text-sm font-semibold rounded-lg border border-transparent bg-white text-grey border-grey m-1 hover:bg-orange-200 disabled:bg-neutral-300 " onClick={() => setUserPage(userPage - 1)} disabled={userPage <= 0}>
                               «
                             </button>
-                            <button className="w-12 p-1 text-sm font-semibold rounded-lg border border-transparent bg-white text-grey border-grey m-1 hover:bg-orange-200 disabled:bg-neutral-300" onClick={() => setFranchisePage(franchisePage + 1)} disabled={!franchiseList.more}>
+                            <button className="w-12 p-1 text-sm font-semibold rounded-lg border border-transparent bg-white text-grey border-grey m-1 hover:bg-orange-200 disabled:bg-neutral-300" onClick={() => setUserPage(userPage + 1)} disabled={!userList.more}>
                               »
                             </button>
                           </td>
@@ -200,6 +228,7 @@ export default function AdminDashboard(props: Props) {
               </div>
             </div>
           </div>
+        </div>
       </View>
     );
   }
