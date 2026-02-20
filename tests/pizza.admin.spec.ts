@@ -231,3 +231,15 @@ test('admin can complete close store workflow', async ({ page }) => {
     await page.waitForURL('**/admin-dashboard');
   }
 });
+
+test('admin list users page', async ({ page }) => {
+  await adminInit(page);
+  await page.goto('/login');
+  await page.getByPlaceholder('Email address').fill('admin@jwt.com');
+  await page.getByPlaceholder('Password').fill('admin');
+  await page.getByRole('button', { name: 'Login' }).click();
+
+  await page.goto('/admin-dashboard');
+  await expect(page.getByText('Users')).toBeVisible();
+  
+});
