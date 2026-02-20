@@ -29,18 +29,8 @@ export default function AdminDashboard(props: Props) {
   React.useEffect(() => {
     (async () => {
       if (Role.isRole(props.user, Role.Admin)) {
-        const users: User[] = [];
-        let page = 0;
-        let more = true;
-
-        while (more) {
-          const result = await pizzaService.getUsers(page, 50, '*');
-          users.push(...result.users);
-          more = result.more;
-          page += 1;
-        }
-
-        setUserList({ users, more: false });
+        const result = await pizzaService.getUsers(userPage, 10, '*');
+        setUserList(result);
       }
     })();
   }, [props.user, userPage]);
@@ -62,19 +52,9 @@ export default function AdminDashboard(props: Props) {
   }
 
   async function filterUsers() {
-    const users: User[] = [];
-    let page = 0;
-    let more = true;
     const nameFilter = `*${filterUserRef.current?.value ?? ''}*`;
-
-    while (more) {
-      const result = await pizzaService.getUsers(page, 50, nameFilter);
-      users.push(...result.users);
-      more = result.more;
-      page += 1;
-    }
-
-    setUserList({ users, more: false });
+    const result = await pizzaService.getUsers(0, 10, nameFilter);
+    setUserList(result);
   }
 
   async function deleteUser(user: User) {
@@ -85,18 +65,8 @@ export default function AdminDashboard(props: Props) {
     try {
       await pizzaService.deleteUser(user);
       // Refresh the user list after deletion
-      const users: User[] = [];
-      let page = 0;
-      let more = true;
-
-      while (more) {
-        const result = await pizzaService.getUsers(page, 50, '*');
-        users.push(...result.users);
-        more = result.more;
-        page += 1;
-      }
-
-      setUserList({ users, more: false });
+      const result = await pizzaService.getUsers(0, 10, '*');
+      setUserList(result);
     } catch (err: any) {
       console.error('Delete failed:', err);
       alert(`Failed to delete user: ${err.message || 'Unknown error'}`);
@@ -214,7 +184,7 @@ export default function AdminDashboard(props: Props) {
                       {userList.users.length === 0 ? (
                         <tbody className="divide-y divide-gray-200">
                           <tr className="border-neutral-500 border-t-2">
-                            <td className="px-2 py-3 text-sm text-gray-800" colSpan={3}>
+                            <td className="px-2 py-3 text-sm text-gray-800" colSpan={4}>
                               No users found.
                             </td>
                           </tr>

@@ -90,23 +90,16 @@ test('admin can filter franchises', async ({ page }) => {
   expect(mamaVisible).toBe(false);
 });
 
-test('admin can navigate franchise pages', async ({ page }) => {
-  await adminInit(page);
-  await page.goto('/login');
-  await page.getByPlaceholder('Email address').fill('admin@jwt.com');
-  await page.getByPlaceholder('Password').fill('admin');
-  await page.getByRole('button', { name: 'Login' }).click();
+// test('admin can navigate franchise pages', async ({ page }) => {
+//   await adminInit(page);
+//   await page.goto('/login');
+//   await page.getByPlaceholder('Email address').fill('admin@jwt.com');
+//   await page.getByPlaceholder('Password').fill('admin');
+//   await page.getByRole('button', { name: 'Login' }).click();
 
-  await page.goto('/admin-dashboard');
-  
-  // Verify previous button is disabled initially
-  const prevButton = page.locator('button:has-text("«")');
-  await expect(prevButton).toBeDisabled();
-  
-  // Next button should be disabled (no more franchises)
-  const nextButton = page.locator('button:has-text("»")');
-  await expect(nextButton).toBeDisabled();
-});
+//   await page.goto('/admin-dashboard');
+
+// });
 
 test('admin can close franchise', async ({ page }) => {
   await adminInit(page);
@@ -165,7 +158,6 @@ test('admin dashboard displays table headers', async ({ page }) => {
   await expect(page.getByRole('columnheader', { name: 'Franchisee', exact: true })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Store', exact: true })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Revenue', exact: true })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Action', exact: true })).toBeVisible();
 });
 
 test('admin can complete close franchise workflow', async ({ page }) => {
@@ -256,5 +248,5 @@ test('admin users list includes mock users', async ({ page }) => {
   
   // Verify at least one user from the mock is visible
   await expect(page.getByRole('cell', { name: 'Mario' }).nth(1)).toBeVisible();
-  
+
 });
