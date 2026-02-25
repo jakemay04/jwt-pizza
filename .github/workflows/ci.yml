@@ -31,11 +31,11 @@ jobs:
         run: |
           npm ci && npm run build
 
-      - name: Update pages artifact
-        uses: actions/upload-pages-artifact@v4
+      - name: Update dist artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: dist/
           name: package
+          path: dist/
       - name: Run tests
         run: |
           npx playwright install --with-deps chromium
@@ -45,8 +45,6 @@ jobs:
           coverage=$(jq '.total.lines.pct' coverage/coverage-summary.json)
           color=$(echo "$coverage < 80" | bc | awk '{if ($1) print "red"; else print "green"}')
           curl -s -X POST "https://pizza-factory.cs329.click/api/badge/${{ secrets.NET_ID }}/jwtpizzacoverage?label=Coverage&value=$coverage%25&color=$color" -H "authorization: bearer ${{ secrets.FACTORY_API_KEY }}"
-
-
 
   deploy:
     needs: build
@@ -68,8 +66,6 @@ jobs:
         with:
           name: package
           path: dist/
-      - name: Check dist contents
-        run: ls -la dist/
 
       - name: Push to AWS S3
         run: |
