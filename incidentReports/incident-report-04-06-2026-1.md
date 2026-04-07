@@ -11,10 +11,15 @@ For 45 minutes between 13:15 and 14:00, all our users were unable to successfull
 
 ## Timeline
 13:15 - an alert was triggered that JWT pizza failure rate was rising.
+
 13:20 - the problem was analyzed.
+
 13:30 - an attempt to restart the server was attempted, but solved nothing
+
 13:40 - the client side http 500 error was traced to the backend order endpoint.
+
 13:50 - the link was discovered in the HTTP body that allowed for the factory to resume production
+
 13:55 - JWT pizza orders were functioning as expected.
 
 ## Response
