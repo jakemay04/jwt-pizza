@@ -55,18 +55,6 @@ Self test 5 - Jake May
 | Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
 | Corrections    | Sanitize all sql queries for injection attacts
 
-
-Peer test 5 - Jake May to Jonah Shirts
-| Item           | Result                                                                         |
-| -------------- | ------------------------------------------------------------------------------ |
-| Date           | April 13th, 2026                                                                  |
-| Target         | pizza.heypizza.click                                                       |
-| Classification | Injection                                                                      |
-| Severity       | 3                                                                              |
-| Description    | Update password field allows for sql injection attacts. All usernames have been changed. Admin no longer works.                |
-| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
-| Corrections    | Sanitize all sql queries for injection attacts
-
 ## PEER ATTACKS
 
 Peer test 1 - Jake May to Jonah Shirts
@@ -74,11 +62,11 @@ Peer test 1 - Jake May to Jonah Shirts
 | -------------- | ------------------------------------------------------------------------------ |
 | Date           | April 13th, 2026                                                                  |
 | Target         | pizza.heypizza.click                                                       |
-| Classification | Cryptographic Failures                                                                      |
+| Classification | Injection                                                                      |
 | Severity       | 3                                                                              |
-| Description    | Pizza price can be modified before purchase. Stores can show negitive numbers in revenue.                |
-| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
-| Corrections    | Create checks for purchase prices
+| Description    | Update password field allows for sql injection attacts. All usernames have been changed. Admin no longer works.                |
+| Images         | <img width="518" height="563" alt="peer-test-1" src="https://github.com/user-attachments/assets/1828d9f9-cba9-441e-994a-8f0f28b829aa" /> |
+| Corrections    | Sanitize all sql queries for injection attacts
 
 Peer test 2 - Jake May to Jonah Shirts
 | Item           | Result                                                                         |
@@ -88,10 +76,8 @@ Peer test 2 - Jake May to Jonah Shirts
 | Classification | Cryptographic Failures                                                                      |
 | Severity       | 3                                                                              |
 | Description    | Pizza price can be modified before purchase. Stores can show negitive numbers in revenue.                |
-| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Images         | <img width="500" height="auto" alt="Peer-test-2" src="https://github.com/user-attachments/assets/72b4648c-359f-4fb9-b307-33e9e1e2ceba" />|
 | Corrections    | Create checks for purchase prices
-
-
 
 Peer test 3 - Jake May to Jonah Shirts
 | Item           | Result                                                                         |
@@ -101,9 +87,8 @@ Peer test 3 - Jake May to Jonah Shirts
 | Classification | Authentication                                                                      |
 | Severity       | 3                                                                              |
 | Description    | Admin or any account can be accessed by intercepting and injecting a blank password.                |
-| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Images         |<img width="500" height="auto" alt="peer-test-3" src="https://github.com/user-attachments/assets/69edfe7d-1658-4fbe-9d50-61a1cced35e8" /> |
 | Corrections    | Check for blank passwords
-
 
 Peer test 4 - Jake May to Jonah Shirts
 | Item           | Result                                                                         |
@@ -112,8 +97,8 @@ Peer test 4 - Jake May to Jonah Shirts
 | Target         | pizza.heypizza.click 
 | Classification | Cryptographic Failures                                                                      |
 | Severity       | 0                                                                              |
-| Description    | Menu cannot be edited or altered for any users. JSON cannot be interecepted.             |
-| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Description    | Menu cannot be edited or altered for any users. JSON cannot be intercepted.             |
+| Images         | N/A |
 | Corrections    | N/A
 
 Peer test 5 - Jake May to Jonah Shirts
@@ -124,7 +109,7 @@ Peer test 5 - Jake May to Jonah Shirts
 | Classification | Authentication                                                                      |
 | Severity       | 0                                                                              |
 | Description    | User roll cannot be intercepted/changed to upgrade role without admin authorization             |
-| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Images         | N/A |
 | Corrections    | N/A
 
 ## SUMARRY
