@@ -1,3 +1,5 @@
+## SELF ATTACKS
+
 Self test 1 - Jake May
 | Item           | Result                                                                         |
 | -------------- | ------------------------------------------------------------------------------ |
@@ -52,3 +54,78 @@ Self test 5 - Jake May
 | Description    | When update user json in intercepted, sql query injections are allowed through the name field.                |
 | Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
 | Corrections    | Sanitize all sql queries for injection attacts
+
+
+Peer test 5 - Jake May to Jonah Shirts
+| Item           | Result                                                                         |
+| -------------- | ------------------------------------------------------------------------------ |
+| Date           | April 13th, 2026                                                                  |
+| Target         | pizza.heypizza.click                                                       |
+| Classification | Injection                                                                      |
+| Severity       | 3                                                                              |
+| Description    | Update password field allows for sql injection attacts. All usernames have been changed. Admin no longer works.                |
+| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Corrections    | Sanitize all sql queries for injection attacts
+
+## PEER ATTACKS
+
+Peer test 1 - Jake May to Jonah Shirts
+| Item           | Result                                                                         |
+| -------------- | ------------------------------------------------------------------------------ |
+| Date           | April 13th, 2026                                                                  |
+| Target         | pizza.heypizza.click                                                       |
+| Classification | Cryptographic Failures                                                                      |
+| Severity       | 3                                                                              |
+| Description    | Pizza price can be modified before purchase. Stores can show negitive numbers in revenue.                |
+| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Corrections    | Create checks for purchase prices
+
+Peer test 2 - Jake May to Jonah Shirts
+| Item           | Result                                                                         |
+| -------------- | ------------------------------------------------------------------------------ |
+| Date           | April 13th, 2026                                                                  |
+| Target         | pizza.heypizza.click                                                       |
+| Classification | Cryptographic Failures                                                                      |
+| Severity       | 3                                                                              |
+| Description    | Pizza price can be modified before purchase. Stores can show negitive numbers in revenue.                |
+| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Corrections    | Create checks for purchase prices
+
+
+
+Peer test 3 - Jake May to Jonah Shirts
+| Item           | Result                                                                         |
+| -------------- | ------------------------------------------------------------------------------ |
+| Date           | April 13th, 2026                                                                  |
+| Target         | pizza.heypizza.click 
+| Classification | Authentication                                                                      |
+| Severity       | 3                                                                              |
+| Description    | Admin or any account can be accessed by intercepting and injecting a blank password.                |
+| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Corrections    | Check for blank passwords
+
+
+Peer test 4 - Jake May to Jonah Shirts
+| Item           | Result                                                                         |
+| -------------- | ------------------------------------------------------------------------------ |
+| Date           | April 13th, 2026                                                                  |
+| Target         | pizza.heypizza.click 
+| Classification | Cryptographic Failures                                                                      |
+| Severity       | 0                                                                              |
+| Description    | Menu cannot be edited or altered for any users. JSON cannot be interecepted.             |
+| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Corrections    | N/A
+
+Peer test 5 - Jake May to Jonah Shirts
+| Item           | Result                                                                         |
+| -------------- | ------------------------------------------------------------------------------ |
+| Date           | April 13th, 2026                                                                  |
+| Target         | pizza.heypizza.click 
+| Classification | Authentication                                                                      |
+| Severity       | 0                                                                              |
+| Description    | User roll cannot be intercepted/changed to upgrade role without admin authorization             |
+| Images         |<img width="500" height="auto" alt="self-test-5" src="https://github.com/user-attachments/assets/d9eb19d0-41fa-4f33-92e4-7e115b740031" /> |
+| Corrections    | N/A
+
+## SUMARRY
+I learned that a lot of assumptions I made were very easy to exploit and were pretty bad. Also, I found that attacking others helped me think outside the box and help me understand what though processes I should be more cautious about. I loved being able to apply what I learned in class and experimenting on different techniques.
